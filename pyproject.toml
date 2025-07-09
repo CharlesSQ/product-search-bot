@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "product-search-bot"
+version = "0.1.0"
+description = "A conversational agent for product search."
+authors = ["CharlesSQ <charlessq@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+lark = "1.1.7"
+langchain = "0.0.305"
+pinecone-client = "2.2.4"
+openai = "0.28.1"
+tiktoken = "0.5.1"
+python-dotenv = "1.0.0"
+pandas = "2.0.3"
+fastapi = "0.115.13"
+uvicorn = "^0.29.0"
+
+[tool.poetry.group.dev.dependencies]
+poetry-dotenv-plugin = "^0.2.0"
+pytest = "^8.1.1"
+pytest-asyncio = "^0.23.6"
+ruff = "^0.3.5"
+pip-audit = "^2.7.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
