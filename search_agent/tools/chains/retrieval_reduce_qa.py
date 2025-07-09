@@ -10,7 +10,26 @@ from langchain.chat_models import ChatOpenAI
 
 
 class CustomStuffDocumentsChain(StuffDocumentsChain):
+    """
+    A custom document stuffing chain that formats each document individually.
+
+    This class overrides the default behavior to ensure each document is formatted
+    using the provided `document_prompt` before being joined together. This is
+    useful for when documents have metadata that needs to be included in the final
+    context string.
+    """
     def _get_inputs(self, docs: List[Document], **kwargs: Any) -> dict:
+        """
+        Formats and combines documents into a single input for the LLM chain.
+
+        Args:
+            docs (List[Document]): The list of documents to be processed.
+            **kwargs: Additional keyword arguments to be passed to the LLM chain.
+
+        Returns:
+            dict: A dictionary of inputs for the LLM chain, with the formatted
+                  documents under the `document_variable_name` key.
+        """
         # Format each document according to the prompt
         doc_strings = [format_document(
             doc, self.document_prompt) for doc in docs]
@@ -26,7 +45,23 @@ class CustomStuffDocumentsChain(StuffDocumentsChain):
 
 
 def create_retrieval_reduce_qa_tool(llm: ChatOpenAI, retriever: VectorStoreRetriever, reduce_template: str, document_template: str, input_variables):
-    """Create a retrieval qa tool with a reduce chain."""
+    """
+    Creates a RetrievalQA tool that uses a map-reduce style approach.
+
+    This function constructs a complex chain that first retrieves relevant documents,
+    then combines them (stuffing) into a single context, and finally "reduces"
+    them by passing them to an LLM to generate a final answer based on a template.
+
+    Args:
+        llm (ChatOpenAI): The language model to use for the final reduction step.
+        retriever (VectorStoreRetriever): The retriever for fetching relevant documents.
+        reduce_template (str): The prompt template for the final summarization/reduction.
+        document_template (str): The prompt template for formatting each individual document.
+        input_variables (list[str]): The list of variable names expected by the document_template.
+
+    Returns:
+        RetrievalQA: A configured RetrievalQA chain instance.
+    """
     reduce_prompt = PromptTemplate.from_template(reduce_template)
     reduce_chain = LLMChain(llm=llm, prompt=reduce_prompt)
 
@@ -57,7 +92,20 @@ def create_retrieval_reduce_qa_tool(llm: ChatOpenAI, retriever: VectorStoreRetri
 
 
 def format_document(doc: Document, prompt: BasePromptTemplate) -> str:
-    """Format a document into a string based on a prompt template."""
+    """
+    Safely formats a document into a string using a prompt template.
+
+    This function combines the document's page_content and metadata and uses them
+    to format the prompt. It handles cases where metadata keys required by the
+    prompt are missing from the document by substituting `None`.
+
+    Args:
+        doc (Document): The document to format.
+        prompt (BasePromptTemplate): The template to use for formatting.
+
+    Returns:
+        str: The formatted document as a string.
+    """
     base_info = {"page_content": doc.page_content, **doc.metadata}
     missing_metadata = set(prompt.input_variables).difference(base_info)
 

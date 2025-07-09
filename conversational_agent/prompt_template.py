@@ -5,7 +5,7 @@ from langchain.schema import SystemMessage, BaseMessage, HumanMessage, AIMessage
 
 
 class UserMessage(BaseMessage):
-    """A Message from a user."""
+    """Represents a message from the user in the conversation."""
 
     example: bool = False
     """Whether this Message is being passed in to the model as part of an example 
@@ -21,6 +21,15 @@ class UserMessage(BaseMessage):
 
 
 class ConversationlAgentPromptTemplate(BaseChatPromptTemplate):
+    """
+    A custom prompt template for the conversational agent.
+
+    This class assembles the final prompt from multiple components:
+    - A prefix and instructions.
+    - A dynamically generated list of available tools and their descriptions.
+    - The ongoing chat history.
+    - A suffix containing the current user input.
+    """
     # The template to use
     prefix: str
     instructions: str
@@ -28,12 +37,37 @@ class ConversationlAgentPromptTemplate(BaseChatPromptTemplate):
     tools: List[Tool]
 
     def _set_tool_description(self, tool_description, tool_name, tool_input):
+        """
+        Formats the description for a single tool, including the expected JSON output.
+
+        Args:
+            tool_description (str): The base description of the tool.
+            tool_name (str): The name of the tool.
+            tool_input (str): A description of the expected input for the tool.
+
+        Returns:
+            str: The fully formatted tool description.
+        """
         full_description = f"""{tool_description}, send this Json format:
 ```json{{"action": "{tool_name}", "action_input": "{tool_input}"}}
 ```"""
         return full_description
 
     def format_messages(self, **kwargs) -> str:
+        """
+        Assembles the final list of messages to be sent to the LLM.
+
+        This method takes the input variables (like chat_history and user input),
+        formats the tool descriptions, and constructs a sequence of System, AI, and
+        Human messages that form the complete prompt.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments, expected to contain 'chat_history'
+                      and other variables for formatting the prompt.
+
+        Returns:
+            list[BaseMessage]: A list of formatted messages ready for the LLM.
+        """
         # Create a tools variable from the list of tools provided
         chat_context: str = "{chat_history}"
 

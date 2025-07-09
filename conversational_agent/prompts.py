@@ -1,4 +1,11 @@
+"""
+This module contains the string templates for constructing the prompts used by the ConversationalAgent.
 
+It defines the main instructions and the suffix for the prompts, which guide the
+language model on how to process user input, use tools, and format its response.
+"""
+
+# An older, more complex version of the prompt instructions, detailing a step-by-step reasoning process for the agent.
 TEMPLATE_INSTRUCTIONS1 = """Follow these steps to answer the user queries:
 
 chat history: <chat-history>{chat_history}</chat-history>
@@ -22,9 +29,14 @@ Step 6 - Respond in this Json format:
 
 """
 
+# The corresponding suffix for the older prompt template.
 SUFFIX1 = """\nFollow all the steps instructions in order. Don't skip any step."""
 
 
+# The main instruction template for the conversational agent.
+# It instructs the agent to act as a sales assistant, use the provided context (chat history),
+# and choose an appropriate action, either providing a final answer or using a tool.
+# The `{tools}` placeholder is dynamically filled with the list of available tools.
 TEMPLATE_INSTRUCTIONS = """You are a helpful sales assistant
 
 You'll be provided with a "context" and a list of "actions" to answer the user.
@@ -41,4 +53,7 @@ Actions:
 """
 
 
+# The suffix for the prompt, which includes the user's actual input.
+# It also reinforces that the response must be in JSON format.
+# The `{input}` placeholder is dynamically filled with the user's message.
 SUFFIX = "{input}\nRespond Only in JSON format!"
